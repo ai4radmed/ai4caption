@@ -109,7 +109,7 @@ const FILL = qs.get('fill') === '1';    // 오버레이(창 가득)
 const ch = new BroadcastChannel('livecap');
 
 /* ================= 설정 ================= */
-const DEFAULTS = { side: 'right', vpos: 'middle', widthPct: 34, lines: 3, fs: 40, ofs: 30 };
+const DEFAULTS = { side: 'left', vpos: 'middle', widthPct: 34, lines: 8, fs: 40, ofs: 30 };
 function loadSettings() {
   try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('livecap.settings') || '{}') }; }
   catch (e) { return { ...DEFAULTS }; }
