@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SideCaption</title>
+<style>
+  :root { --fs: 40px; --w: 34%; --lines: 3; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "Segoe UI", "Malgun Gothic", -apple-system, sans-serif; background: #0d1117; color: #e6edf3; }
+
+  /* ---- 자막 띠 (보조 스크린·오버레이·미리보기 공용) ---- */
+  .strip-root { position: absolute; inset: 0; background: #000; overflow: hidden; }
+  .strip {
+    position: absolute; width: var(--w);
+    height: calc(var(--lines) * var(--fs) * 1.35 + 28px);
+    padding: 14px 18px; overflow: hidden; background: #000; color: #fff;
+  }
+  .strip .inner {
+    height: calc(var(--lines) * var(--fs) * 1.35); overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .strip-root.fill .strip .inner { height: 100%; }
+  .strip.left { left: 0; }
+  .strip.right { right: 0; }
+  .strip.top { top: 6%; }
+  .strip.middle { top: 50%; transform: translateY(-50%); }
+  .strip.bottom { bottom: 6%; }
+  .strip-root.fill .strip { position: static; width: 100%; height: 100%; transform: none; }
+  .strip .ln { font-size: var(--fs); line-height: 1.35; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .strip .ln.interim { color: #9aa4af; font-weight: 400; }
+
+  /* ---- 운영 화면 ---- */
+  #ctl { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+  h1 { font-size: 18px; margin: 0; color: #58a6ff; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 14px; }
+  button, select { font-size: 14px; padding: 8px 14px; border-radius: 8px; border: 1px solid #30363d; background: #21262d; color: #e6edf3; cursor: pointer; }
+  button.primary { background: #238636; border-color: #2ea043; font-weight: 600; }
+  button.stop { background: #da3633; border-color: #f85149; }
+  button.mode { font-size: 18px; font-weight: 700; padding: 12px 26px; }
+  button.mode.on { background: #1f6feb; border-color: #388bfd; }
+  label { font-size: 13px; color: #9aa7b4; display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { width: 120px; }
+  #status { margin-left: auto; font-size: 13px; color: #9aa7b4; display: flex; gap: 8px; align-items: center; }
+  #dot { width: 10px; height: 10px; border-radius: 50%; background: #6e7681; }
+  #dot.live { background: #2ea043; box-shadow: 0 0 8px #2ea043; }
+  #preview { position: relative; aspect-ratio: 16 / 9; max-width: 720px; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+  #log { max-height: 240px; overflow-y: auto; font-size: 14px; line-height: 1.5; }
+  #log .src { color: #9aa7b4; } #log .tgt { color: #79c0ff; margin-bottom: 6px; } #log .err { color: #f85149; }
+  .hint { font-size: 12.5px; color: #8b949e; line-height: 1.6; }
+  kbd { background: #21262d; border: 1px solid #30363d; border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="ctl">
+  <div class="row">
+    <h1>SideCaption — 운영 화면</h1>
+    <div id="status"><span id="dot"></span><span id="statusText">대기 중</span><span id="net"></span></div>
+  </div>
+
+  <div class="card row">
+    <button id="startBtn" class="primary">▶ 시작 <kbd>S</kbd></button>
+    <button id="modeEN" class="mode on">EN 영어 발화 <kbd>E</kbd></button>
+    <button id="modeKO" class="mode">KO 한국어 발화 <kbd>K</kbd></button>
+    <button id="clearBtn">지우기 <kbd>C</kbd></button>
+    <span class="hint">EN: 영어 인식→그대로 표시 · KO: 한국어 인식→영어 번역 표시. 청중 화면은 항상 영어만.</span>
+  </div>
+
+  <div class="card row">
+    <button id="openAux">① 보조 스크린으로 열기</button>
+    <button id="openOverlay">② 오버레이 열기 (비상: 메인 스크린만)</button>
+    <label>위치 <select id="side"><option value="left">좌측</option><option value="right">우측</option></select></label>
+    <label>세로 <select id="vpos"><option value="top">위</option><option value="middle">가운데</option><option value="bottom">아래</option></select></label>
+    <label>띠 폭 <input id="widthPct" type="range" min="20" max="60" step="1"><span id="widthV"></span></label>
+    <label>줄 수 <select id="lines"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
+    <label>보조 글자 <input id="fs" type="range" min="24" max="80" step="2"><span id="fsV"></span></label>
+    <label>오버레이 글자 <input id="ofs" type="range" min="18" max="60" step="2"><span id="ofsV"></span></label>
+  </div>
+
+  <div class="card"><div class="hint" style="margin-bottom:6px">보조 스크린 미리보기 (실제 배치 비율 기준)</div><div id="preview"><div class="strip-root" id="pvRoot"></div></div></div>
+  <div class="card"><div class="hint" style="margin-bottom:6px">운영 로그 (원문 / 청중용 영어)</div><div id="log"></div></div>
+
+  <div class="hint">
+    마이크: Web Speech API 는 장치를 고를 수 없고 <b>OS 기본 입력장치</b>를 씁니다 — 윈도우 소리 설정에서 기본 마이크를 지정하세요.<br>
+    자막 창에서 <kbd>F</kbd> 또는 더블클릭 = 전체화면. 오버레이는 Chrome/Edge 에서 항상-위 창으로 뜹니다(PPT 는 전체보기가 아닌 창 모드 권장).
+  </div>
+</div>
+
+<script>
+const qs = new URLSearchParams(location.search);
+const VIEW = qs.get('view');            // 'caption' = 자막 전용 창
+const FILL = qs.get('fill') === '1';    // 오버레이(창 가득)
+const ch = new BroadcastChannel('livecap');
+
+/* ================= 설정 ================= */
+const DEFAULTS = { side: 'right', vpos: 'middle', widthPct: 34, lines: 3, fs: 40, ofs: 30 };
+function loadSettings() {
+  try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('livecap.settings') || '{}') }; }
+  catch (e) { return { ...DEFAULTS }; }
+}
+function saveSettings(s) { try { localStorage.setItem('livecap.settings', JSON.stringify(s)); } catch (e) {} }
+
+/* ================= 자막 띠 ================= */
+class Strip {
+  constructor(doc, root, fill) {
+    this.doc = doc; this.root = root; this.fill = fill; this.lines = [];
+    root.classList.toggle('fill', !!fill);
+    this.el = doc.createElement('div'); this.el.className = 'strip';
+    this.inner = doc.createElement('div'); this.inner.className = 'inner';
+    this.el.appendChild(this.inner); root.appendChild(this.el);
+  }
+  apply(s) {
+    const st = this.root.style;
+    st.setProperty('--fs', (this.fill ? s.ofs : s.fs) + 'px');
+    st.setProperty('--w', s.widthPct + '%');
+    st.setProperty('--lines', s.lines);
+    this.el.className = 'strip ' + s.side + ' ' + s.vpos;
+    this.render();
+  }
+  upsert(id, text, final) {
+    const l = this.lines.find(x => x.id === id);
+    if (l) { l.text = text; l.final = final; } else this.lines.push({ id, text, final });
+    if (this.lines.length > 24) this.lines.splice(0, this.lines.length - 24);
+    this.render();
+  }
+  remove(id) { this.lines = this.lines.filter(x => x.id !== id); this.render(); }
+  clear() { this.lines = []; this.render(); }
+  render() {
+    const n = Number(this.root.style.getPropertyValue('--lines')) || 3;
+    const vis = this.lines.slice(-n);
+    this.inner.replaceChildren(...vis.map((l, i) => {
+      const p = this.doc.createElement('p');
+      p.className = 'ln' + (l.final ? '' : ' interim');
+      p.textContent = l.text;
+      const age = vis.length - 1 - i;
+      p.style.opacity = age === 0 ? 1 : age === 1 ? 0.8 : 0.6;
+      return p;
+    }));
+  }
+  handle(m) {
+    if (m.type === 'settings') this.apply(m.s);
+    else if (m.type === 'line') this.upsert(m.id, m.text, m.final);
+    else if (m.type === 'remove') this.remove(m.id);
+    else if (m.type === 'clear') this.clear();
+  }
+}
+
+/* ================= 자막 전용 창 (?view=caption) ================= */
+if (VIEW === 'caption') {
+  document.getElementById('ctl').remove();
+  const root = document.createElement('div'); root.className = 'strip-root'; document.body.appendChild(root);
+  const strip = new Strip(document, root, FILL);
+  strip.apply(loadSettings());
+  ch.onmessage = e => strip.handle(e.data);
+  ch.postMessage({ type: 'hello' });
+  const toggleFs = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  addEventListener('dblclick', toggleFs);
+  addEventListener('keydown', e => { if (e.key === 'f' || e.key === 'F') toggleFs(); });
+  document.title = 'Caption';
+} else {
+
+/* ================= 운영 화면 ================= */
+const $ = id => document.getElementById(id);
+let S = loadSettings();
+const strips = [];                      // 이 페이지 안의 띠(미리보기·PiP)
+let state = [];                          // 현재 줄 기록 (새 창 hello 응답용)
+
+const pv = new Strip(document, $('pvRoot'), false); strips.push(pv);
+
+function emit(m) { ch.postMessage(m); strips.forEach(s => s.handle(m)); }
+function pushLine(id, text, final) {
+  const l = state.find(x => x.id === id);
+  if (l) { l.text = text; l.final = final; } else state.push({ id, text, final });
+  if (state.length > 24) state.splice(0, state.length - 24);
+  emit({ type: 'line', id, text, final });
+}
+function dropLine(id) { state = state.filter(x => x.id !== id); emit({ type: 'remove', id }); }
+
+ch.onmessage = e => {
+  if (e.data.type === 'hello') {
+    ch.postMessage({ type: 'settings', s: S });
+    state.forEach(l => ch.postMessage({ type: 'line', ...l }));
+  }
+};
+
+function bindSetting(id, valId, fmt) {
+  const el = $(id);
+  el.value = S[id];
+  const upd = () => { const v = el.type === 'range' || el.tagName === 'SELECT' && !isNaN(el.value) ? Number(el.value) : el.value; S[id] = v; if (valId) $(valId).textContent = fmt(v); saveSettings(S); emit({ type: 'settings', s: S }); };
+  el.oninput = upd; el.onchange = upd;
+  if (valId) $(valId).textContent = fmt(S[id]);
+}
+bindSetting('side'); bindSetting('vpos');
+bindSetting('widthPct', 'widthV', v => v + '%');
+bindSetting('lines');
+bindSetting('fs', 'fsV', v => v + 'px');
+bindSetting('ofs', 'ofsV', v => v + 'px');
+emit({ type: 'settings', s: S });
+
+/* ---- 창 열기 ---- */
+async function openAux() {
+  let feat = 'popup,width=1280,height=720';
+  try {
+    if (window.getScreenDetails) {
+      const d = await getScreenDetails();
+      const cur = d.currentScreen;
+      const other = d.screens.find(x => x !== cur) || cur;
+      feat = `popup,left=${other.availLeft},top=${other.availTop},width=${other.availWidth},height=${other.availHeight}`;
+    }
+  } catch (e) { /* 권한 거부 시 기본 위치 — 수동으로 끌어다 놓기 */ }
+  window.open(location.pathname + '?view=caption', 'livecap-aux', feat);
+}
+$('openAux').onclick = openAux;
+
+let pipWin = null, pipStrip = null;
+async function openOverlay() {
+  const h = Math.round(S.lines * S.ofs * 1.35 + 40);
+  if ('documentPictureInPicture' in window) {
+    try {
+      if (pipWin) pipWin.close();
+      pipWin = await documentPictureInPicture.requestWindow({ width: 1100, height: h });
+      document.querySelectorAll('style').forEach(st => pipWin.document.head.appendChild(st.cloneNode(true)));
+      pipWin.document.body.style.margin = '0';
+      const root = pipWin.document.createElement('div'); root.className = 'strip-root';
+      pipWin.document.body.appendChild(root);
+      pipStrip = new Strip(pipWin.document, root, true); strips.push(pipStrip);
+      pipStrip.apply(S); state.forEach(l => pipStrip.upsert(l.id, l.text, l.final));
+      pipWin.addEventListener('pagehide', () => { strips.splice(strips.indexOf(pipStrip), 1); pipWin = pipStrip = null; });
+      return;
+    } catch (e) { /* 폴백 */ }
+  }
+  window.open(location.pathname + '?view=caption&fill=1', 'livecap-ov', `popup,width=1100,height=${h}`);
+}
+$('openOverlay').onclick = openOverlay;
+
+/* ================= 인식·번역 ================= */
+// 엔진 어댑터 — 이후 Deepgram/Azure 등으로 교체할 때 이 인터페이스만 맞추면 된다.
+class WebSpeechEngine {
+  constructor(h) { this.h = h; this.r = null; this.on = false; }
+  start(lang) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('Chrome 또는 Edge 를 사용하세요.'); return false; }
+    this.on = true;
+    const r = this.r = new SR();
+    r.lang = lang; r.continuous = true; r.interimResults = true;
+    r.onresult = e => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript.trim();
+        if (!t) continue;
+        e.results[i].isFinal ? this.h.final(t) : this.h.interim(t);
+      }
+    };
+    r.onerror = ev => { if (ev.error === 'not-allowed') { this.on = false; this.h.status('마이크 권한 거부', false); } else if (ev.error !== 'no-speech') this.h.status('오류: ' + ev.error, true); };
+    r.onend = () => { if (this.on) { try { r.start(); } catch (e) {} } };
+    r.start(); return true;
+  }
+  stop() { this.on = false; if (this.r) { this.r.onend = null; this.r.stop(); } }
+}
+
+// KO→EN 번역 (임시: 비공식 gtx → MyMemory 폴백. 현장 투입 전 공식 API/LLM 으로 교체 대상)
+async function translateKoEn(text) {
+  try {
+    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=en&dt=t&q=' + encodeURIComponent(text));
+    if (r.ok) { const d = await r.json(); if (Array.isArray(d) && d[0]) return d[0].map(s => s[0]).join(''); }
+  } catch (e) {}
+  const r = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=ko|en');
+  const d = await r.json();
+  if (d.responseData && d.responseData.translatedText) return d.responseData.translatedText;
+  throw new Error('translate failed');
+}
+
+let mode = 'EN', running = false, seq = 0, curInterim = null;
+const engine = new WebSpeechEngine({
+  interim(t) { if (mode === 'EN') { curInterim = curInterim || 'i' + (++seq); pushLine(curInterim, t, false); } },
+  final(t) {
+    const id = curInterim || 'l' + (++seq); curInterim = null;
+    if (mode === 'EN') { pushLine(id, t, true); log(t, t); }
+    else {
+      pushLine(id, '…', false);
+      translateKoEn(t).then(en => { pushLine(id, en, true); log(t, en); })
+                      .catch(() => { dropLine(id); log(t, null); });
+    }
+  },
+  status(t, live) { setStatus(t, live); }
+});
+
+function log(src, tgt) {
+  const box = $('log');
+  const a = document.createElement('div'); a.className = 'src'; a.textContent = (mode === 'EN' ? 'EN ' : 'KO ') + src;
+  const b = document.createElement('div'); b.className = tgt ? 'tgt' : 'err'; b.textContent = tgt ? '→ ' + tgt : '→ (번역 실패 — 네트워크 확인)';
+  box.append(a, b); box.scrollTop = box.scrollHeight;
+}
+function setStatus(t, live) { $('statusText').textContent = t; $('dot').classList.toggle('live', !!live); }
+
+function begin() {
+  if (engine.start(mode === 'EN' ? 'en-US' : 'ko-KR')) {
+    running = true; setStatus('듣는 중 (' + mode + ')', true);
+    $('startBtn').textContent = '⏸ 정지 [S]'; $('startBtn').className = 'stop';
+  }
+}
+function end() {
+  engine.stop(); running = false; curInterim = null; setStatus('정지됨', false);
+  $('startBtn').innerHTML = '▶ 시작 <kbd>S</kbd>'; $('startBtn').className = 'primary';
+}
+function setMode(m) {
+  if (m === mode) return;
+  mode = m; $('modeEN').classList.toggle('on', m === 'EN'); $('modeKO').classList.toggle('on', m === 'KO');
+  if (running) { engine.stop(); curInterim = null; setTimeout(begin, 250); }   // 언어 전환 = 재시작
+}
+function clearAll() { state = []; $('log').replaceChildren(); emit({ type: 'clear' }); }
+
+$('startBtn').onclick = () => running ? end() : begin();
+$('modeEN').onclick = () => setMode('EN');
+$('modeKO').onclick = () => setMode('KO');
+$('clearBtn').onclick = clearAll;
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  const k = e.key.toLowerCase();
+  if (k === 'e') setMode('EN'); else if (k === 'k') setMode('KO'); else if (k === 's') running ? end() : begin(); else if (k === 'c') clearAll();
+});
+const netUpd = () => { $('net').textContent = navigator.onLine ? '· 온라인' : '· ⚠ 오프라인'; };
+addEventListener('online', netUpd); addEventListener('offline', netUpd); netUpd();
+}
+</script>
+</body>
+</html>
