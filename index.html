@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SideCaption</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
   :root { --fs: 40px; --w: 34%; --lines: 3; }
   * { box-sizing: border-box; }
@@ -89,6 +93,9 @@
 </div>
 
 <script>
+// PWA — https(GitHub Pages)·localhost 에서만 등록된다
+if ('serviceWorker' in navigator && isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {});
+
 const qs = new URLSearchParams(location.search);
 const VIEW = qs.get('view');            // 'caption' = 자막 전용 창
 const FILL = qs.get('fill') === '1';    // 오버레이(창 가득)
