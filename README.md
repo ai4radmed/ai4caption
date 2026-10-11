@@ -42,6 +42,7 @@ Chrome 고정: STT(Chrome 음성인식)·번역이 모두 Google 경로라 사�
 - 엔진 순서(자동): claude → gemini → google. 첫 글자가 나오기 전 실패하면 다음 엔진으로 넘어간다. 키가 없는 엔진은 건너뛴다.
 - 서버가 전부 실패하면 앱이 **확정 문장만** 무료 gtx 로 번역한다(미리 번역은 생략).
 - `GET /api/translate` = 예열 + 설정된 엔진 표시(앱이 시작 시 호출). Origin 허용 = `ai4radmed.github.io`·localhost.
-- 번역어 세트: `glossary/ko-en.js` 수정 → push → `npx vercel deploy --prod --scope ai4radmed` (Vercel 은 Git 연동이 아니라 CLI 배포).
+- 배포: Vercel 이 GitHub `main` 과 연결돼 있어 **push 하면 Pages(앱)와 Vercel(서버)이 함께 자동 배포**된다. env 변경 후에는 Redeploy 필요.
+- 번역어 세트: `glossary/ko-en.js` 수정 → push.
 - 실측: `node bench/run.mjs [claude gemini google]` (서울 → Vercel → 엔진, 첫 글자·완료 중앙값). 로컬 시험: `node bench/local-test.mjs <엔진> "<문장>"` (셸 env 의 키 사용).
 - 앱 쪽: 스트리밍 표시, 말하는 도중 미리 번역(인식이 400ms 멈추면 번역해 회색 임시 자막, 확정 시 교체), 시작 시 서버 예열.
