@@ -1,6 +1,6 @@
 // 앱 셸 캐시 — 네트워크 우선(수정이 push 즉시 반영), 오프라인일 때만 캐시로 연다.
 // STT·번역 같은 외부 요청은 건드리지 않는다 (같은 origin 만 처리).
-const CACHE = 'sidecaption-v4';
+const CACHE = 'sidecaption-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-512-maskable.png'];
 

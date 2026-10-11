@@ -34,6 +34,7 @@
   .strip-root.fill .strip { position: static; width: 100%; height: 100%; transform: none; }
   .strip .ln { font-size: var(--fs); line-height: 1.35; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
   .strip .ln.interim { color: #9aa4af; font-weight: 400; }
+  .strip-root.fill .ln { text-align: center; }
 
   /* ---- 운영 화면 ---- */
   #ctl { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
@@ -52,7 +53,12 @@
   #status { margin-left: auto; font-size: 13px; color: #9aa7b4; display: flex; gap: 8px; align-items: center; }
   #dot { width: 10px; height: 10px; border-radius: 50%; background: #6e7681; }
   #dot.live { background: #2ea043; box-shadow: 0 0 8px #2ea043; }
-  #preview { position: relative; aspect-ratio: 16 / 9; max-width: 720px; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+  .preview { position: relative; aspect-ratio: 16 / 9; width: 100%; max-width: 640px; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+  .preview.slide { background: #e9edf2; }
+  .preview.slide::before { content: '발표 슬라이드 (PowerPoint)'; position: absolute; inset: 0; display: grid; place-items: center; color: #8b949e; font-size: 14px; }
+  .mode-card h2 { font-size: 15px; margin: 0 0 10px; color: #e6edf3; }
+  .mode-card h2 small { font-weight: 400; color: #8b949e; margin-left: 6px; }
+  .mode-card .row { margin-bottom: 10px; }
   #log { max-height: 240px; overflow-y: auto; font-size: 14px; line-height: 1.5; }
   #log .src { color: #9aa7b4; } #log .tgt { color: #79c0ff; margin-bottom: 6px; } #log .err { color: #f85149; }
   .hint { font-size: 12.5px; color: #8b949e; line-height: 1.6; }
@@ -79,23 +85,35 @@
     <span class="hint">EN: 영어 인식→그대로 표시 · KO: 한국어 인식→영어 번역 표시. 청중 화면은 항상 영어만.</span>
   </div>
 
-  <div class="card row">
-    <button id="openAux">① 보조 스크린으로 열기</button>
-    <button id="openOverlay">② 오버레이 열기 (비상: 메인 스크린만)</button>
-    <label>위치 <select id="side"><option value="left">좌측</option><option value="right">우측</option></select></label>
-    <label>세로 <select id="vpos"><option value="top">위</option><option value="middle">가운데</option><option value="bottom">아래</option></select></label>
-    <label>띠 폭 <input id="widthPct" type="range" min="20" max="60" step="1"><span id="widthV"></span></label>
-    <label>줄 수 <select id="lines"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
-    <label>보조 글자 <input id="fs" type="range" min="24" max="80" step="2"><span id="fsV"></span></label>
-    <label>오버레이 글자 <input id="ofs" type="range" min="18" max="60" step="2"><span id="ofsV"></span></label>
+  <div class="card mode-card">
+    <h2>① 오버레이 <small>메인 — 발표 화면(PowerPoint) 위 상단/하단 자막 띠, 항상 위</small></h2>
+    <div class="row">
+      <button id="openOverlay" class="primary">① 오버레이 열기</button>
+      <label>위치 <select id="ovPos"><option value="top">상단</option><option value="bottom">하단</option></select></label>
+      <label>줄 수 <select id="ovLines"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+      <label>글자 <input id="ofs" type="range" min="18" max="60" step="2"><span id="ofsV"></span></label>
+    </div>
+    <div class="preview slide" id="ovPreview"><div class="strip-root" id="ovRoot"></div></div>
   </div>
 
-  <div class="card"><div class="hint" style="margin-bottom:6px">보조 스크린 미리보기 (실제 배치 비율 기준)</div><div id="preview"><div class="strip-root" id="pvRoot"></div></div></div>
+  <div class="card mode-card">
+    <h2>② 보조 스크린 <small>보조 모니터·프로젝터가 따로 있을 때 — 좌/우 세로 띠</small></h2>
+    <div class="row">
+      <button id="openAux">② 보조 스크린으로 열기</button>
+      <label>위치 <select id="side"><option value="left">좌측</option><option value="right">우측</option></select></label>
+      <label>세로 <select id="vpos"><option value="top">위</option><option value="middle">가운데</option><option value="bottom">아래</option></select></label>
+      <label>띠 폭 <input id="widthPct" type="range" min="20" max="60" step="1"><span id="widthV"></span></label>
+      <label>줄 수 <select id="lines"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
+      <label>글자 <input id="fs" type="range" min="24" max="80" step="2"><span id="fsV"></span></label>
+    </div>
+    <div class="preview" id="pvPreview"><div class="strip-root" id="pvRoot"></div></div>
+  </div>
   <div class="card"><div class="hint" style="margin-bottom:6px">운영 로그 (원문 / 청중용 영어)</div><div id="log"></div></div>
 
   <div class="hint">
     마이크: Web Speech API 는 장치를 고를 수 없고 <b>OS 기본 입력장치</b>를 씁니다 — 윈도우 소리 설정에서 기본 마이크를 지정하세요.<br>
-    자막 창에서 <kbd>F</kbd> 또는 더블클릭 = 전체화면. 오버레이는 Chrome 에서 항상-위 창으로 뜹니다(PPT 는 전체보기가 아닌 창 모드 권장).
+    오버레이: Chrome 의 항상-위 창(PiP)으로 뜹니다. 화면 폭 전체로 요청하지만 창 위치는 브라우저가 정하므로, 처음 한 번 상단/하단으로 끌어다 놓으세요. PPT 는 슬라이드 쇼 대신 <b>읽기용 보기/창 모드</b> 권장.<br>
+    보조 스크린 자막 창에서 <kbd>F</kbd> 또는 더블클릭 = 전체화면.
   </div>
 </div>
 
@@ -109,7 +127,9 @@ const FILL = qs.get('fill') === '1';    // 오버레이(창 가득)
 const ch = new BroadcastChannel('livecap');
 
 /* ================= 설정 ================= */
-const DEFAULTS = { side: 'left', vpos: 'middle', widthPct: 50, lines: 8, fs: 24, ofs: 30 };
+// 보조 스크린(side·vpos·widthPct·lines·fs) 과 오버레이(ovPos·ovLines·ofs) 는 설정을 따로 갖는다
+const DEFAULTS = { side: 'left', vpos: 'middle', widthPct: 50, lines: 8, fs: 24, ovPos: 'top', ovLines: 2, ofs: 32 };
+const ovHeight = s => Math.round(s.ovLines * s.ofs * 1.35 + 28);
 function loadSettings() {
   try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('livecap.settings') || '{}') }; }
   catch (e) { return { ...DEFAULTS }; }
@@ -118,8 +138,9 @@ function saveSettings(s) { try { localStorage.setItem('livecap.settings', JSON.s
 
 /* ================= 자막 띠 ================= */
 class Strip {
-  constructor(doc, root, fill) {
-    this.doc = doc; this.root = root; this.fill = fill; this.lines = [];
+  // fill = 오버레이(창 가득), scale = 미리보기 축소 비율 함수, band = 미리보기에서 상단/하단 띠로 배치
+  constructor(doc, root, fill, scale, band) {
+    this.doc = doc; this.root = root; this.fill = fill; this.scale = scale || (() => 1); this.band = band; this.preview = !!scale; this.lines = [];
     root.classList.toggle('fill', !!fill);
     this.el = doc.createElement('div'); this.el.className = 'strip';
     this.inner = doc.createElement('div'); this.inner.className = 'inner';
@@ -127,9 +148,11 @@ class Strip {
   }
   apply(s) {
     const st = this.root.style;
-    st.setProperty('--fs', (this.fill ? s.ofs : s.fs) + 'px');
+    const k = this.scale();
+    st.setProperty('--fs', (this.fill ? s.ofs : s.fs) * k + 'px');
     st.setProperty('--w', s.widthPct + '%');
-    st.setProperty('--lines', s.lines);
+    st.setProperty('--lines', this.fill ? s.ovLines : s.lines);
+    if (this.band) { st.height = ovHeight(s) * k + 'px'; st.inset = s.ovPos === 'top' ? '0 0 auto 0' : 'auto 0 0 0'; }
     this.el.className = 'strip ' + s.side + ' ' + s.vpos;
     this.render();
   }
@@ -143,7 +166,10 @@ class Strip {
   clear() { this.lines = []; this.render(); }
   render() {
     const n = Number(this.root.style.getPropertyValue('--lines')) || 3;
-    const vis = this.lines.slice(-n);
+    // 미리보기는 자막이 없을 때 견본 줄로 배치를 보여준다
+    const src = this.lines.length || !this.preview ? this.lines
+      : Array.from({ length: n }, (_, i) => ({ id: 's' + i, text: 'Sample caption line ' + (i + 1) + ' — real-time English subtitle', final: true }));
+    const vis = src.slice(-n);
     this.inner.replaceChildren(...vis.map((l, i) => {
       const p = this.doc.createElement('p');
       p.className = 'ln' + (l.final ? '' : ' interim');
@@ -181,7 +207,9 @@ let S = loadSettings();
 const strips = [];                      // 이 페이지 안의 띠(미리보기·PiP)
 let state = [];                          // 현재 줄 기록 (새 창 hello 응답용)
 
-const pv = new Strip(document, $('pvRoot'), false); strips.push(pv);
+const pvScale = el => () => (el.clientWidth || 640) / screen.width;
+strips.push(new Strip(document, $('pvRoot'), false, pvScale($('pvPreview'))));
+strips.push(new Strip(document, $('ovRoot'), true, pvScale($('ovPreview')), true));
 
 function emit(m) { ch.postMessage(m); strips.forEach(s => s.handle(m)); }
 function pushLine(id, text, final) {
@@ -202,7 +230,7 @@ ch.onmessage = e => {
 function bindSetting(id, valId, fmt) {
   const el = $(id);
   el.value = S[id];
-  const upd = () => { const v = el.type === 'range' || el.tagName === 'SELECT' && !isNaN(el.value) ? Number(el.value) : el.value; S[id] = v; if (valId) $(valId).textContent = fmt(v); saveSettings(S); emit({ type: 'settings', s: S }); };
+  const upd = () => { const v = el.type === 'range' || el.tagName === 'SELECT' && !isNaN(el.value) ? Number(el.value) : el.value; S[id] = v; if (valId) $(valId).textContent = fmt(v); saveSettings(S); emit({ type: 'settings', s: S }); if (['ovPos', 'ovLines', 'ofs'].includes(id)) fitOverlay(); };
   el.oninput = upd; el.onchange = upd;
   if (valId) $(valId).textContent = fmt(S[id]);
 }
@@ -211,7 +239,9 @@ bindSetting('widthPct', 'widthV', v => v + '%');
 bindSetting('lines');
 bindSetting('fs', 'fsV', v => v + 'px');
 bindSetting('ofs', 'ofsV', v => v + 'px');
+bindSetting('ovPos'); bindSetting('ovLines');
 emit({ type: 'settings', s: S });
+addEventListener('resize', () => strips.forEach(x => x.apply(S)));
 
 /* ---- 창 열기 ---- */
 async function openAux() {
@@ -229,12 +259,26 @@ async function openAux() {
 $('openAux').onclick = openAux;
 
 let pipWin = null, pipStrip = null;
+// 오버레이 창의 목표 위치 — 이 창이 있는 화면의 상단 또는 하단, 폭 전체
+function ovRect() {
+  const w = screen.availWidth, h = ovHeight(S);
+  const left = screen.availLeft ?? 0, top0 = screen.availTop ?? 0;
+  return { left, top: S.ovPos === 'top' ? top0 : top0 + screen.availHeight - h, width: w, height: h };
+}
+// 설정이 바뀌면 열린 오버레이 창 크기·위치를 맞춘다 (브라우저가 거부하면 무시 — 사용자가 직접 끌기)
+function fitOverlay() {
+  if (!pipWin) return;
+  const r = ovRect();
+  try { pipWin.resizeTo(r.width, r.height); } catch (e) {}
+  try { pipWin.moveTo(r.left, r.top); } catch (e) {}
+}
 async function openOverlay() {
-  const h = Math.round(S.lines * S.ofs * 1.35 + 40);
+  const r = ovRect();
   if ('documentPictureInPicture' in window) {
     try {
       if (pipWin) pipWin.close();
-      pipWin = await documentPictureInPicture.requestWindow({ width: 1100, height: h });
+      pipWin = await documentPictureInPicture.requestWindow({ width: r.width, height: r.height });
+      fitOverlay();
       document.querySelectorAll('style').forEach(st => pipWin.document.head.appendChild(st.cloneNode(true)));
       pipWin.document.body.style.margin = '0';
       const root = pipWin.document.createElement('div'); root.className = 'strip-root';
@@ -245,7 +289,7 @@ async function openOverlay() {
       return;
     } catch (e) { /* 폴백 */ }
   }
-  window.open(location.pathname + '?view=caption&fill=1', 'livecap-ov', `popup,width=1100,height=${h}`);
+  window.open(location.pathname + '?view=caption&fill=1', 'livecap-ov', `popup,left=${r.left},top=${r.top},width=${r.width},height=${r.height}`);
 }
 $('openOverlay').onclick = openOverlay;
 
