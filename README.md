@@ -28,3 +28,20 @@ Chrome 고정: STT(Chrome 음성인식)·번역이 모두 Google 경로라 사�
 - ① 보조 스크린: 보조 모니터·프로젝터가 따로 있을 때 좌/우 세로 띠(폭·줄수·세로 위치 조절), 보조 스크린에 창 전체화면(F)
 - ② 오버레이: 발표 화면(PPT) 위에 겹치는 자막 띠 — Document PiP 항상-위 창. 위치 상·하(폭 전체)·좌·우(높이 전체, 폭 % 조절), 1~10줄. 첫 실행 때 창을 원하는 가장자리로 끌어다 놓기. PPT 는 읽기용 보기/창 모드 권장
 - 엔진은 어댑터(`WebSpeechEngine`, `translateKoEn`) — 현장 투입 전 성능 좋은 STT·번역으로 교체 예정
+
+## 번역 중계 서버 (`api/translate.js` — Vercel Edge, 서울 icn1)
+
+앱 → `https://ai4caption.vercel.app/api/translate` → 번역 엔진. **API 키는 Vercel env 에만** 있고 팀 노트북·저장소에는 없다.
+
+| env | 엔진 | 비고 |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Claude (`CLAUDE_MODEL`, 기본 `claude-haiku-5-5`) | 사고 끔, 시스템 프롬프트(용어집 포함) 캐시. Console 워크스페이스 월 지출 한도로 하드캡 |
+| `GEMINI_API_KEY` | Gemini (`GEMINI_MODEL`, 기본 `gemini-flash-lite-latest`) | 무료 등급(분당 10회)은 실시간에 부족 — 유료 등급 키 |
+| `GOOGLE_TRANSLATE_API_KEY` | Google Cloud Translation v2 | 번역 전용(가장 빠름). 용어집은 사전 치환으로 근사 |
+
+- 엔진 순서(자동): claude → gemini → google. 첫 글자가 나오기 전 실패하면 다음 엔진으로 넘어간다. 키가 없는 엔진은 건너뛴다.
+- 서버가 전부 실패하면 앱이 **확정 문장만** 무료 gtx 로 번역한다(미리 번역은 생략).
+- `GET /api/translate` = 예열 + 설정된 엔진 표시(앱이 시작 시 호출). Origin 허용 = `ai4radmed.github.io`·localhost.
+- 번역어 세트: `glossary/ko-en.js` 수정 → push → `npx vercel deploy --prod --scope ai4radmed` (Vercel 은 Git 연동이 아니라 CLI 배포).
+- 실측: `node bench/run.mjs [claude gemini google]` (서울 → Vercel → 엔진, 첫 글자·완료 중앙값). 로컬 시험: `node bench/local-test.mjs <엔진> "<문장>"` (셸 env 의 키 사용).
+- 앱 쪽: 스트리밍 표시, 말하는 도중 미리 번역(인식이 400ms 멈추면 번역해 회색 임시 자막, 확정 시 교체), 시작 시 서버 예열.
