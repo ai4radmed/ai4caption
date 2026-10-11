@@ -1,19 +1,181 @@
 ko	en	aliases	source	note
-한국원자력의학원	Korea Institute of Radiological & Medical Sciences (KIRAMS)		seed	
-원자력의학원	KIRAMS		seed	
-핵의학	nuclear medicine		seed	
-방사성의약품	radiopharmaceutical		seed	
-양전자방출단층촬영	positron emission tomography (PET)		seed	
-방사선 안전관리	radiation safety management		seed	
-방사선작업종사자	radiation worker		seed	
-선량한도	dose limit		seed	
-유효선량	effective dose		seed	
-등가선량	equivalent dose		seed	
-선량계	dosimeter		seed	
-피폭	radiation exposure		seed	
-차폐	shielding		seed	
-오염	contamination		seed	
-제염	decontamination		seed	
+흡수선량	absorbed dose		ICRP139-glossary	
+등가선량	equivalent dose		ICRP139-glossary	
+유효선량	effective dose		ICRP139-glossary	
+조직/장기 평균 흡수선량	mean absorbed dose in a tissue or organ	조직 평균 흡수선량; 장기 평균 흡수선량	ICRP139-glossary	
+방사선가중치	radiation weighting factor	방사선 가중계수	ICRP139-glossary	
+조직가중치	tissue weighting factor	조직 가중계수	ICRP139-glossary	
+그레이	gray (Gy)		ICRP139-glossary	
+시버트	sievert (Sv)	시벨트	ICRP139-glossary	
+밀리시버트	millisievert (mSv)	밀리시벨트	standard	
+마이크로시버트	microsievert (μSv)	마이크로시벨트	standard	
+선량계수	dose coefficient		ICRP139-glossary	
+실용량	operational quantity	실용 선량; 운용량	ICRP139-glossary	
+개인선량당량	personal dose equivalent	개인 선량 당량	ICRP139-glossary	
+공기커마	air kerma	공기 커마	ICRP139-body	
+커마면적곱	kerma-area product (KAP)	면적선량; 공기커마면적곱; 선량면적곱; 케이에이피; 디에이피	ICRP139-body	
+기준점 공기커마	reference air kerma (Ka,r)	누적 공기커마; 참조점 공기커마; 환자 입사 기준점 공기커마	standard	
+선량률	dose rate	선량율	ICRP139-body	
+투시 시간	fluoroscopy time	형광투시 시간; 방사선 투시 시간; 투시시간	ICRP139-body	
+피부선량	skin dose	피부 선량	ICRP139-body	
+최대 피부선량	peak skin dose (PSD)	최고 피부선량; 첨두 피부선량	standard	
+조직반응 문턱선량	threshold dose for tissue reactions	문턱선량; 임계선량; 역치선량	ICRP139-glossary	
+선량한도	dose limit	선량 한계; 피폭선량한도	ICRP139-glossary	
+연간 유효선량 한도	annual effective dose limit	연간 선량한도	kjpbt	
+등가선량한도	equivalent dose limit	등가선량 한도	ICRP139-body	
+수정체 선량한도	dose limit for the lens of the eye	눈 수정체 선량한도; 수정체 등가선량한도	ICRP139-body	
+직무 선량	occupational dose	직무선량; 직업 선량	ICRP139-body	
+선량감축인자	dose reduction factor (DRF)	선량저감인자; 선량 감소 인자	ICRP139-body	
+납등가	lead equivalence	납당량; 납 등가 두께; 납당량 두께	ICRP139-body	
+감쇠	attenuation		ICRP139-body	
+직무피폭	occupational exposure	직업피폭; 직업적 피폭; 작업자 피폭; 직무 피폭선량	ICRP139-glossary	
+의료피폭	medical exposure		ICRP139-glossary	
+일반인피폭	public exposure	공중피폭; 일반인 피폭선량	standard	ICRP139 영문 본문에는 없음, ICRP 표준용어 사용
+계획피폭상황	planned exposure situation	계획 피폭상황	ICRP139-body	
+산란방사선	scattered radiation	산란선; 산란 X선; 산란광자	ICRP139-body	
+후방산란	backscatter	후방 산란선	ICRP139-body	
+1차빔	primary beam	일차빔; 주빔; 일차 방사선	ICRP139-body	
+방사선방호	radiological protection	방사선 방어; 방사선 방호	ICRP139-body	ICRP 원문은 radiological protection 위주(167회), radiation protection도 26회 혼용 — 통일 여부 검토
+직무 방사선방호	occupational radiological protection	직무피폭 방호; 직업 방사선방호	ICRP139-body	
+방호원칙	principles of protection	방사선방호 원칙; 방호 3원칙	ICRP139-glossary	
+정당화	justification	정당성	ICRP139-body	
+방호최적화	optimisation of protection	최적화; 방사선방호 최적화	ICRP139-glossary	ICRP 원문 영국식 철자(optimisation) — 자막을 미국식 optimization으로 할지 검토
+선량한도 적용	application of dose limits	선량한도의 적용	ICRP139-body	
+알라라	ALARA (as low as reasonably achievable)	ALARA; 합리적으로 달성 가능한 낮은 수준; 합리적으로 달성 가능한 한 낮게	ICRP139-body	
+선량제약치	dose constraint	선량제약; 선량 제한치	ICRP139-body	
+진단참조준위	diagnostic reference level (DRL)	진단참고수준; 진단참조수준; 진단참고준위; 디알엘	standard	ICRP139 영문 본문에 없음(한글판 각주에만) — 표준용어 사용
+조사준위	investigation level	조사 기준치	ICRP139-body	
+시간 거리 차폐	time, distance and shielding	외부피폭 방호 3원칙	standard	
+역제곱 법칙	inverse square law	거리 역제곱 법칙; 거리 제곱 반비례 법칙	standard	
+안전문화	safety culture	방사선 안전문화; 방사선안전 문화	ICRP139-body	
+품질보증	quality assurance (QA)	큐에이	ICRP139-body	
+교육훈련	education and training	방사선방호 교육; 방사선방호 교육훈련; 안전교육	ICRP139-body	
+방사선방호 프로그램	radiological protection programme	방호 프로그램; 방사선안전 프로그램	ICRP139-body	영국식 철자 programme — 미국식 program 여부 검토
+고용주	employer	사업주	ICRP139-glossary	
+종사자	worker	방사선작업종사자; 방사선종사자; 작업종사자	ICRP139-glossary	
+의료진	staff	의료 인력; 의료종사자	ICRP139-glossary	
+간병인 및 위안자	carers and comforters	간병인 및 보호자	ICRP139-glossary	
+임신 종사자	pregnant workers	임신한 종사자; 임신 여성 종사자; 임신한 시술자	ICRP139-body	
+태아	embryo/fetus	배아; 배아/태아	ICRP139-body	ICRP는 embryo/fetus 병기 — 문맥상 fetus 단독이 자연스러울 수 있음
+방사선관리책임자	radiological protection officer (RPO)	방사선안전관리자; 방사선관리자; 방사선안전관리책임자; 알피오	ICRP139-body	국내 법정 직함(방사선안전관리자)을 ICRP의 RPO로 대응 — 검토
+의학물리사	medical physicist	의학물리학자; 의료물리사; 의학물리전문가	ICRP139-body	
+규제기관	regulatory bodies	규제당국; 규제 기관	ICRP139-body	
+방호복	protective garments	방사선방호복; 방호의; 방사선 방호복	ICRP139-body	
+개인보호구	personal protective equipment (PPE)	개인방호장구; 개인방호용구; 개인보호장구; 피피이	ICRP139-body	
+납치마	protective apron	방호앞치마; 납앞치마; 방호납치마; 방호치마; 납가운; 납복	ICRP139-body	원문 protective apron(33)·lead apron(8) 혼용 — lead apron 선호 여부 검토
+방호조끼	vest	납조끼; 조끼형 방호복	ICRP139-body	
+갑상선보호대	thyroid shield	갑상선 차폐대; 갑상선 칼라; 갑상선 방호대; 갑상선차폐; 갑상선 보호구	ICRP139-body	원문 thyroid shield(7)·thyroid collar(6) 혼용 — 택일 검토
+보안경	protective eyewear	방호안경; 방사선 보안경; 방호 보안경; 차폐안경	ICRP139-body	원문 lead glasses(27)가 protective eyewear(16)보다 빈번 — 강의 의도(일반 개념 vs 납안경)에 맞게 검토
+납안경	lead glasses	납보안경; 납 안경; 납함유 안경	ICRP139-body	
+측면 차폐	side shields	측면 가리개; 측면 보호대	ICRP139-body	
+천장걸이 차폐체	ceiling-suspended shield	천정걸이 차폐; 천장형 차폐; 천장걸이 차폐막; 천장 차폐막; 천정걸이 차폐체; 천장 매달림 차폐; 천장형 차폐막	ICRP139-body	
+침상걸이 커튼	table-suspended curtain	테이블 커튼; 침상걸이 납커튼; 침상 커튼; 테이블 차폐 커튼; 하부 차폐; 테이블 하부 차폐; 납커튼; 차폐 커튼	ICRP139-body	
+이동형 차폐체	mobile shield	이동식 차폐; 이동형 차폐막; 이동식 차폐벽; 이동형 차폐; 이동식 차폐체	ICRP139-body	
+차폐	shielding	방사선 차폐	ICRP139-body	
+차폐 드레이프	shielding drapes	차폐포; 차폐 장막; 차폐 패드; 방호 장막; 일회용 차폐포	ICRP139-body	
+방호장갑	protective gloves	납장갑; 납고무장갑; 차폐장갑	ICRP139-body	
+방호모자	protective cap	납모자; 차폐 모자; 방사선 차폐 모자	standard	ICRP139 영문 본문에 해당 표현 없음(surgical cap만)
+비납	lead-free	무납; 납프리; 비납 방호복	ICRP139-body	
+형광투시	fluoroscopy	방사선 투시; 엑스선 투시; 플루오로스코피	ICRP139-body	
+형광투시 안내 중재술	fluoroscopy guided intervention (FGI)	투시 유도 중재술; 형광투시 유도 시술; 영상유도 중재술	ICRP139-body	
+형광투시 또는 CT 안내 중재술	fluoroscopically or computed tomography guided interventions	투시 또는 CT 유도 중재술	ICRP139-glossary	
+중재절차	interventional procedures	중재시술; 중재술; 인터벤션 시술; 중재 시술	ICRP139-body	
+중재방사선학	interventional radiology	중재영상의학; 인터벤션 영상의학; 중재 영상의학	ICRP139-body	
+중재심장학	interventional cardiology	심장중재술; 심장 중재 시술; 인터벤션 심장학	ICRP139-body	
+중재시술자	interventionalist	중재시술의사; 중재의; 중재 시술의	ICRP139-body	
+시술자	operator	시술의	ICRP139-body	
+CT 형광투시	CT fluoroscopy	CT 투시; 씨티 투시	ICRP139-body	
+콘빔CT	cone beam CT (CBCT)	콘빔 시티; 씨비씨티; 원뿔빔 CT	ICRP139-body	
+디지털차감 혈관조영술	digital subtraction angiography (DSA)	디지털 감산 혈관조영술; 디지털 공제 혈관조영술; 디에스에이	ICRP139-body	
+혈관조영술	angiography	혈관조영; 앤지오	ICRP139-body	
+심도자술	cardiac catheterisation	심장도자술; 심혈관 도자술; 심장 카테터 삽입술	ICRP139-body	원문 catheterisation/catheterization 혼용
+색전술	embolization	혈관색전술	ICRP139-body	원문 embolization/embolisation 동수 혼용 — 철자 통일 검토
+펄스투시	pulsed fluoroscopy	펄스 형광투시; 펄스 모드; 펄스 방식 투시	kjpbt	ICRP 원문은 pulsed mode 표현
+연속투시	continuous fluoroscopy	연속 형광투시; 연속 모드	kjpbt	
+펄스율	pulse frequency	펄스 빈도; 펄스 주파수; 초당 펄스 수	ICRP139-body	
+마지막 영상정지	last image hold	라스트 이미지 홀드; 최종영상 유지; 마지막 영상 고정	ICRP139-body	
+시준	collimation	콜리메이션; 조사야 제한; 빔 시준	ICRP139-body	
+영상확대	magnification	확대 모드; 이미지 확대; 전자 확대	ICRP139-body	kjpbt는 image enlargement 사용 — ICRP 원문 magnification 채택
+X선관	X-ray tube	엑스선관; 엑스레이 튜브; X선 튜브	ICRP139-body	
+영상수용체	image receptor	이미지 수용체; 영상 검출기	ICRP139-body	
+영상증배관	image intensifier	영상증폭관; 이미지 인텐시파이어	ICRP139-body	
+평판검출기	flat panel detector	평판형 검출기; 플랫패널 검출기	standard	ICRP 원문은 flat panel만 단독 사용
+C암	C-arm	씨암; C-암; 씨 암	ICRP139-body	
+선관하부형 투시장비	under-couch x-ray system	언더카우치; 언더카우치 시스템; 선관이 테이블 아래에 있는 장비	ICRP139-body	
+선관상부형 투시장비	over-couch x-ray system	오버카우치; 오버카우치 시스템; 선관이 테이블 위에 있는 장비	ICRP139-body	
+투시 발판	foot pedal	풋페달; 투시 페달	kjpbt	
+환자 선량	patient dose	환자 피폭선량	ICRP139-body	
+종사자 선량	staff dose	의료진 선량; 직원 선량	ICRP139-body	
+개인피폭감시	individual monitoring	개인선량감시; 피폭감시; 개인 모니터링; 개인선량 측정; 선량감시	ICRP139-body	
+선량평가	dose assessment	피폭선량 평가; 선량 추정	ICRP139-body	
+선량계	dosimeter	선량측정기; 도시미터; 선량계 배지	ICRP139-body	
+개인선량계	personal dosimeter	개인 피폭선량계	ICRP139-body	
+납치마 위 선량계	dosimeter over apron	방호복 바깥 선량계; 앞치마 위 선량계; 방호복 위 선량계	ICRP139-glossary	
+납치마 아래 선량계	dosimeter under apron	방호복 안쪽 선량계; 앞치마 아래 선량계; 방호복 아래 선량계	ICRP139-glossary	
+목깃 선량계	collar dosimeter	목 선량계; 칼라 선량계; 갑상선 위치 선량계	ICRP139-body	
+이중 선량계측	double dosimetry	두 선량계 방식; 이중선량계; 두 개의 선량계	ICRP139-body	
+단일 선량계	single dosimeter	선량계 한 개	ICRP139-body	
+눈 선량계	eye dosimeter	수정체 선량계; 안구 선량계	ICRP139-body	
+반지선량계	ring dosimeter	반지형 선량계; 링 선량계; 손가락 선량계	ICRP139-body	
+사지 감시	extremity monitoring	사지 선량감시; 손 선량 감시	ICRP139-body	
+전자선량계	electronic dosimeter	전자식 선량계; 디지털 선량계	ICRP139-body	
+능동형 개인선량계	active personal dosimeter (APD)	능동형 선량계; 실시간 선량계; 에이피디	ICRP139-body	
+피동형 선량계	passive dosimeter	수동형 선량계	ICRP139-body	
+열발광선량계	thermoluminescence dosimeter (TLD)	열형광선량계; 티엘디	ICRP139-body	
+광자극발광	optically stimulated luminescence (OSL)	광자극 발광선량계; 오에스엘	ICRP139-body	
+선량계 판독치	dosimeter reading	선량계 읽음값	ICRP139-body	
+선량기록	dose record	피폭기록; 선량 기록부	ICRP139-body	
+수정체 선량	dose to the lens of the eye	눈 수정체 선량; 수정체 피폭선량; 수정체선량	ICRP139-body	
+눈 수정체	lens of the eye	수정체; 안구 수정체; 눈수정체	ICRP139-body	
+백내장	cataract	방사선 백내장; 방사선유발 백내장	ICRP139-body	
+수정체 혼탁	lens opacities	수정체혼탁	ICRP139-body	
+확률론적 영향	stochastic effect	확률적 영향; 확률적 효과; 확률론적 효과	ICRP139-glossary	
+결정론적 영향	deterministic effect	결정적 영향; 결정적 효과; 비확률적 영향	ICRP139-glossary	
+조직반응	tissue reaction	조직 손상 반응	ICRP139-glossary	
+방사선 위해	detriment	보건위해	ICRP139-body	
+암 위험	cancer risk	발암 위험; 암 발생 위험	ICRP139-body	
+피부 손상	skin injuries	방사선 피부손상; 피부 화상; 방사선 화상	ICRP139-body	
+홍반	erythema	피부 홍반	ICRP139-body	
+심혈관 질환	cardiovascular disease	순환기 질환; 심혈관계 질환; 순환계 질환	standard	
+뇌종양	brain tumours	뇌 종양	ICRP139-body	영국식 철자 tumours
+선형무문턱 모델	linear no-threshold (LNT) model	선형 무문턱; 선형 무역치 모델; 엘엔티	standard	
+핵의학	nuclear medicine	핵의학과	ICRP139-body	
+핵의학 전문의	nuclear medicine specialists	핵의학 의사; 핵의학과 의사	ICRP139-body	
+방사선사	radiographers	핵의학 기사; 방사선 기사; 방사선 기술자	ICRP139-body	핵의학 기사는 원문 technologists와도 대응 — 검토
+방사성의약품	radiopharmaceutical	핵의약품; 방사성 의약품	ICRP139-body	
+방사성핵종	radionuclide	방사성 핵종	ICRP139-body	
+양전자방출단층촬영	positron emission tomography (PET)	양전자단층촬영; 양전자 방출 단층촬영	ICRP139-body	
+펫시티	PET-CT	펫 CT; PET CT; 펫씨티; 양전자방출단층촬영-전산화단층촬영	ICRP139-body	
+단일광자방출 전산화단층촬영	single photon emission computed tomography (SPECT)	스펙트; 단일광자단층촬영; 단일광자방출 CT	ICRP139-body	
+선택적 내부 방사선요법	selective internal radiation therapy (SIRT)	선택적 내부방사선치료; 시르트	ICRP139-body	
+방사선색전술	radioembolization	방사선 색전술; 방사성색전술; 경동맥 방사선색전술	ICRP139-body	원문 radioembolization(6)/radioembolisation(2) 혼용
+이트륨-90	yttrium-90 (90Y)	이트륨 90; 이트리움 90; 와이 90	ICRP139-body	
+마이크로구	microspheres	미세구; 마이크로스피어; 미세구슬	ICRP139-body	
+에프디지	FDG	불소-18 FDG; 플루오로데옥시글루코스; F-18 FDG	ICRP139-body	
+불소-18	fluorine-18 (18F)	불소 18; 에프 18; F-18	ICRP139-body	
+테크네튬-99m	technetium-99m (99mTc)	테크네슘; 테크니슘; 텍네튬; 테크네튬	ICRP139-body	
+대응집 알부민	macroaggregated albumin (MAA)	엠에이에이; 대응집알부민	standard	ICRP 원문은 99mTc-MAA 약어만 사용
+감마카메라	gamma camera	감마 카메라	standard	
+주사기 차폐체	syringe shield	주사기 차폐; 시린지 실드; 주사기 납차폐; 주사기 차폐통	standard	
+바이알	vial	바이얼; 바이알병	ICRP139-body	
+방사능 오염	contamination	오염; 표면오염; 방사성 오염	ICRP139-body	
+방사성의약품 분주	dispensing		standard	
+핫셀	hot cell	핫 셀	standard	
+근접치료	brachytherapy	근접방사선치료	ICRP139-body	
+국제방사선방호위원회	International Commission on Radiological Protection (ICRP)	아이씨알피; ICRP	ICRP139-body	
+ICRP 간행물	ICRP Publication	아이씨알피 간행물; ICRP 보고서; ICRP 권고	ICRP139-body	
+국제원자력기구	International Atomic Energy Agency (IAEA)	아이에이이에이; 아이에아	ICRP139-body	
+국제방사선단위측정위원회	International Commission on Radiation Units and Measurements (ICRU)	아이씨알유	ICRP139-body	
+국제방사선방호학회연합	International Radiation Protection Association (IRPA)	아이알피에이	ICRP139-body	
+세계보건기구	World Health Organization (WHO)		ICRP139-body	
+대한방사선방어학회	Korean Association for Radiation Protection (KARP)	방사선방어학회; 케이에이알피	standard	
+한국원자력의학원	Korea Institute of Radiological and Medical Sciences (KIRAMS)	원자력의학원; 키람스	standard	
+원자력안전위원회	Nuclear Safety and Security Commission (NSSC)	원안위	standard	
+한국원자력안전기술원	Korea Institute of Nuclear Safety (KINS)	원자력안전기술원; 킨스	standard	
+질병관리청	Korea Disease Control and Prevention Agency (KDCA)	질병청	standard	
+과학방문	scientific visit	사이언티픽 비지트; 과학 연수	standard	
+방사선 안전관리	radiation safety management	방사선안전관리	seed	
+피폭	radiation exposure	방사선 피폭	seed	
+제염	decontamination	오염 제거	seed	
 갑상선	thyroid		seed	
-시버트	sievert (Sv)		seed	
-베크렐	becquerel (Bq)		seed	
+베크렐	becquerel (Bq)	베크럴	seed	
