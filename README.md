@@ -43,6 +43,7 @@ Chrome 고정: STT(Chrome 음성인식)·번역이 모두 Google 경로라 사�
 - 서버가 전부 실패하면 앱이 **확정 문장만** 무료 gtx 로 번역한다(미리 번역은 생략).
 - `GET /api/translate` = 예열 + 설정된 엔진 표시(앱이 시작 시 호출). Origin 허용 = `ai4radmed.github.io`·localhost.
 - 배포: Vercel 이 GitHub `main` 과 연결돼 있어 **push 하면 Pages(앱)와 Vercel(서버)이 함께 자동 배포**된다. env 변경 후에는 Redeploy 필요.
+- 용어 결정(2026-10-12): 철자는 ICRP 원문(영국식) 유지, 납치마=lead apron, 태아=fetus, 방사선안전관리자=RSO, 방사선사=radiographer / 핵의학 기사=nuclear medicine technologist.
 - 번역어 세트(용어집) 정본 = **`glossary/ko-en.tsv`** (탭 구분: `ko` · `en` · `aliases`(;로 구분) · `source` · `note`). Excel·메모장으로 고쳐 push → Pages 반영 후 **서버가 1분 안에 새로 읽음**(서버 재배포 불필요). 서버가 못 읽으면 `glossary/seed.js` 비상 목록.
 - 용어 적용: 띄어쓰기 무시 매칭 + 별칭(음성인식 변형) → **그 문장에 나온 용어만** 엔진에 전달(긴 용어 우선) → 앱 로그에 `✓ 용어 n` / `⚠ 용어 미반영: 한글→영문` 표시.
 - 실측: `node bench/run.mjs [claude gemini google]` (서울 → Vercel → 엔진, 첫 글자·완료 중앙값). 로컬 시험: `node bench/local-test.mjs <엔진> "<문장>"` (셸 env 의 키 사용).
