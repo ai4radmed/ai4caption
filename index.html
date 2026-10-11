@@ -396,7 +396,9 @@ async function translateStream(text, { interim = false, signal, onDelta } = {}) 
           out += value;
           if (onDelta && out.trim()) onDelta(out.trim());
         }
-        if (out.trim()) return { text: out.trim(), engine: r.headers.get('x-engine'), ttft, total: performance.now() - t0 };
+        let terms = [];
+        try { terms = JSON.parse(decodeURIComponent(r.headers.get('x-terms') || '%5B%5D')); } catch (e) {}
+        if (out.trim()) return { text: out.trim(), engine: r.headers.get('x-engine'), ttft, total: performance.now() - t0, terms };
       }
     } catch (e) { if (e.name === 'AbortError') throw e; }
   }
@@ -436,10 +438,23 @@ const engine = new WebSpeechEngine({
   status(t, live) { setStatus(t, live); }
 });
 
+// 용어 검증: 문장에 나온 용어의 지정 영문이 번역에 들어갔는지 (괄호 약어·대소문자·단복수 무시)
+function checkTerms(r) {
+  if (!r?.terms?.length) return '';
+  const out = r.text.toLowerCase();
+  const miss = r.terms.filter(([, en]) => {
+    const core = en.replace(/\s*\([^)]*\)/g, '').trim().toLowerCase();
+    const abbr = (en.match(/\(([^)]+)\)/) || [])[1];
+    return !(out.includes(core) || out.includes(core.replace(/s$/, '')) || (abbr && r.text.includes(abbr)));
+  });
+  return miss.length ? '  ⚠ 용어 미반영: ' + miss.map(([ko, en]) => ko + '→' + en).join(', ')
+                     : '  ✓ 용어 ' + r.terms.length;
+}
+
 function log(src, tgt, r) {
   const box = $('log');
   const a = document.createElement('div'); a.className = 'src'; a.textContent = (mode === 'EN' ? 'EN ' : 'KO ') + src;
-  if (r) a.textContent += `  [${r.engine}${r.ttft != null ? ' · 첫 글자 ' + Math.round(r.ttft) + 'ms' : ''} · 완료 ${Math.round(r.total)}ms]`;
+  if (r) a.textContent += `  [${r.engine}${r.ttft != null ? ' · 첫 글자 ' + Math.round(r.ttft) + 'ms' : ''} · 완료 ${Math.round(r.total)}ms]` + checkTerms(r);
   const b = document.createElement('div'); b.className = tgt ? 'tgt' : 'err'; b.textContent = tgt ? '→ ' + tgt : '→ (번역 실패 — 네트워크 확인)';
   box.append(a, b); box.scrollTop = box.scrollHeight;
 }
@@ -454,7 +469,7 @@ function warmUp() {
   if (S.engine === 'gtx' || !S.apiBase) { $('engStat').textContent = '· 엔진: 무료 비상(gtx)'; return; }
   fetch(S.apiBase + '/api/translate').then(r => r.json()).then(d => {
     const on = Object.entries(d.ready).filter(([, v]) => v).map(([k]) => k);
-    $('engStat').textContent = '· 서버 엔진: ' + (on.length ? on.join(', ') : '없음 → gtx 폴백');
+    $('engStat').textContent = '· 서버 엔진: ' + (on.length ? on.join(', ') : '없음 → gtx 폴백') + (d.glossary ? ` · 용어집 ${d.glossary.terms}개` : '');
   }).catch(() => { $('engStat').textContent = '· ⚠ 번역 서버 연결 실패 → gtx 폴백'; });
 }
 warmUp();

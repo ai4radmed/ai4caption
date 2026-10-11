@@ -1,6 +1,4 @@
-// 번역어 세트 (KO → EN) — 번역 엔진이 이 대응을 반드시 따르게 한다.
-// 공개 저장소이므로 용어만 둔다(비밀 아님). 수정 → push → Vercel 재배포로 반영.
-// 초안(2026-10-11): 방사선·핵의학 일반 용어 시드 — 강의 자료 기준으로 Dr. Ben 검토 필요.
+// 비상용 내장 용어집 — ko-en.tsv(정본)를 런타임에 못 읽을 때만 쓴다. 평소 편집은 ko-en.tsv 에서.
 export default [
   ['한국원자력의학원', 'Korea Institute of Radiological & Medical Sciences (KIRAMS)'],
   ['원자력의학원', 'KIRAMS'],
