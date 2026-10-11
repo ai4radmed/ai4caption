@@ -1,0 +1,9 @@
+{
+  "name": "ai4caption",
+  "private": true,
+  "type": "module",
+  "description": "AI4Caption · 동시자막 — 앱(GitHub Pages) + 번역 중계 서버(Vercel Edge, api/)",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
+  }
+}

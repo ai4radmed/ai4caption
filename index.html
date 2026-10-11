@@ -84,7 +84,11 @@
     <button id="modeEN" class="mode on">EN 영어 발화 <kbd>E</kbd></button>
     <button id="modeKO" class="mode">KO 한국어 발화 <kbd>K</kbd></button>
     <button id="clearBtn">지우기 <kbd>C</kbd></button>
-    <span class="hint">EN: 영어 인식→그대로 표시 · KO: 한국어 인식→영어 번역 표시. 청중 화면은 항상 영어만.</span>
+    <label>번역 엔진 <select id="engine">
+      <option value="auto">자동 (Claude → Gemini → Google)</option><option value="claude">Claude</option>
+      <option value="gemini">Gemini</option><option value="google">Google 번역</option><option value="gtx">무료 비상 (gtx)</option>
+    </select></label>
+    <span class="hint">EN: 영어 인식→그대로 표시 · KO: 한국어 인식→영어 번역 표시(말하는 도중 미리 번역). 청중 화면은 항상 영어만. <span id="engStat"></span></span>
   </div>
 
   <div class="card mode-card">
@@ -131,7 +135,8 @@ const ch = new BroadcastChannel('livecap');
 
 /* ================= 설정 ================= */
 // 보조 스크린(side·vpos·widthPct·lines·fs) 과 오버레이(ovPos·ovWidthPct·ovLines·ofs) 는 설정을 따로 갖는다
-const DEFAULTS = { side: 'left', vpos: 'middle', widthPct: 50, lines: 8, fs: 24, ovPos: 'top', ovWidthPct: 25, ovLines: 2, ofs: 32 };
+const DEFAULTS = { side: 'left', vpos: 'middle', widthPct: 50, lines: 8, fs: 24, ovPos: 'top', ovWidthPct: 25, ovLines: 2, ofs: 32,
+                   engine: 'auto', apiBase: 'https://ai4caption.vercel.app' };   // 번역 중계 서버 (api/translate.js)
 const ovSide = s => s.ovPos === 'left' || s.ovPos === 'right';   // 좌/우 = 세로 띠, 상/하 = 가로 띠
 const ovHeight = s => Math.round(s.ovLines * s.ofs * 1.35 + 28);
 function loadSettings() {
@@ -249,7 +254,7 @@ bindSetting('widthPct', 'widthV', v => v + '%');
 bindSetting('lines');
 bindSetting('fs', 'fsV', v => v + 'px');
 bindSetting('ofs', 'ofsV', v => v + 'px');
-bindSetting('ovPos'); bindSetting('ovLines');
+bindSetting('ovPos'); bindSetting('ovLines'); bindSetting('engine');
 bindSetting('ovWidthPct', 'ovWidthV', v => v + '%');
 const ovWidthUi = () => { $('ovWidthPct').disabled = !ovSide(S); $('ovWidthL').style.opacity = ovSide(S) ? 1 : 0.4; };
 $('ovPos').addEventListener('change', ovWidthUi); ovWidthUi();
@@ -357,7 +362,7 @@ class WebSpeechEngine {
   stop() { this.on = false; if (this.r) { this.r.onend = null; this.r.stop(); } }
 }
 
-// KO→EN 번역 (임시: 비공식 gtx → MyMemory 폴백. 현장 투입 전 공식 API/LLM 으로 교체 대상)
+// 무료 비상 번역 (비공식 gtx → MyMemory). 중계 서버가 안 될 때 확정 문장에만 쓴다.
 async function translateKoEn(text) {
   try {
     const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=en&dt=t&q=' + encodeURIComponent(text));
@@ -369,24 +374,71 @@ async function translateKoEn(text) {
   throw new Error('translate failed');
 }
 
+// 중계 서버 번역 — 스트리밍으로 받으며 onDelta 로 지금까지의 번역을 넘긴다.
+// 반환 { text, engine, ttft(첫 글자까지 ms), total(ms) }. 서버 실패 시 확정 문장은 gtx 로 폴백.
+const ctxKo = [];                        // 최근 확정 한국어 문장 (번역 문맥)
+async function translateStream(text, { interim = false, signal, onDelta } = {}) {
+  const t0 = performance.now();
+  if (S.engine !== 'gtx' && S.apiBase) {
+    try {
+      const r = await fetch(S.apiBase + '/api/translate', {
+        method: 'POST', headers: { 'content-type': 'application/json' }, signal,
+        body: JSON.stringify({ text, context: ctxKo.slice(-3), interim, engine: S.engine }),
+      });
+      if (r.ok) {
+        const rd = r.body.pipeThrough(new TextDecoderStream()).getReader();
+        let out = '', ttft = null;
+        for (;;) {
+          const { value, done } = await rd.read();
+          if (done) break;
+          if (ttft === null) ttft = performance.now() - t0;
+          out += value;
+          if (onDelta && out.trim()) onDelta(out.trim());
+        }
+        if (out.trim()) return { text: out.trim(), engine: r.headers.get('x-engine'), ttft, total: performance.now() - t0 };
+      }
+    } catch (e) { if (e.name === 'AbortError') throw e; }
+  }
+  if (interim) throw new Error('no speculative fallback');
+  const en = await translateKoEn(text);
+  return { text: en, engine: 'gtx', ttft: null, total: performance.now() - t0 };
+}
+
 let mode = 'EN', running = false, seq = 0, curInterim = null;
+// 말하는 도중 미리 번역: 중간 인식 결과가 잠시 멈추면(400ms) 번역해 회색 임시 자막으로 띄운다.
+// 문장이 확정되면 진행 중인 미리 번역을 취소하고 확정 번역으로 갈아 끼운다.
+let specTimer = null, specCtl = null;
+function cancelSpec() { clearTimeout(specTimer); if (specCtl) specCtl.abort(); specCtl = null; }
+function speculate(id, t) {
+  if (t.length < 4) return;
+  if (specCtl) specCtl.abort();
+  const ctl = specCtl = new AbortController();
+  translateStream(t, { interim: true, signal: ctl.signal, onDelta: en => { if (id === curInterim && !ctl.signal.aborted) pushLine(id, en, false); } })
+    .catch(() => {});
+}
 const engine = new WebSpeechEngine({
-  interim(t) { if (mode === 'EN') { curInterim = curInterim || 'i' + (++seq); pushLine(curInterim, t, false); } },
+  interim(t) {
+    curInterim = curInterim || 'i' + (++seq);
+    if (mode === 'EN') { pushLine(curInterim, t, false); return; }
+    const id = curInterim;
+    clearTimeout(specTimer); specTimer = setTimeout(() => speculate(id, t), 400);
+  },
   final(t) {
     const id = curInterim || 'l' + (++seq); curInterim = null;
-    if (mode === 'EN') { pushLine(id, t, true); log(t, t); }
-    else {
-      pushLine(id, '…', false);
-      translateKoEn(t).then(en => { pushLine(id, en, true); log(t, en); })
-                      .catch(() => { dropLine(id); log(t, null); });
-    }
+    if (mode === 'EN') { pushLine(id, t, true); log(t, t); return; }
+    cancelSpec();
+    if (!state.some(l => l.id === id)) pushLine(id, '…', false);
+    translateStream(t, { onDelta: en => pushLine(id, en, false) })
+      .then(r => { pushLine(id, r.text, true); log(t, r.text, r); ctxKo.push(t); if (ctxKo.length > 3) ctxKo.shift(); })
+      .catch(() => { dropLine(id); log(t, null); });
   },
   status(t, live) { setStatus(t, live); }
 });
 
-function log(src, tgt) {
+function log(src, tgt, r) {
   const box = $('log');
   const a = document.createElement('div'); a.className = 'src'; a.textContent = (mode === 'EN' ? 'EN ' : 'KO ') + src;
+  if (r) a.textContent += `  [${r.engine}${r.ttft != null ? ' · 첫 글자 ' + Math.round(r.ttft) + 'ms' : ''} · 완료 ${Math.round(r.total)}ms]`;
   const b = document.createElement('div'); b.className = tgt ? 'tgt' : 'err'; b.textContent = tgt ? '→ ' + tgt : '→ (번역 실패 — 네트워크 확인)';
   box.append(a, b); box.scrollTop = box.scrollHeight;
 }
@@ -396,8 +448,20 @@ function setStatus(t, live) { $('statusText').textContent = t; $('dot').classLis
 const IS_CHROME = !!navigator.userAgentData?.brands?.some(b => b.brand === 'Google Chrome');
 if (!IS_CHROME) { $('browserWarn').hidden = false; $('startBtn').disabled = true; }
 
+// 중계 서버 예열 — 시작 버튼을 누르는 순간 깨워 첫 문장 지연(콜드 스타트)을 없앤다. 설정된 엔진도 표시.
+function warmUp() {
+  if (S.engine === 'gtx' || !S.apiBase) { $('engStat').textContent = '· 엔진: 무료 비상(gtx)'; return; }
+  fetch(S.apiBase + '/api/translate').then(r => r.json()).then(d => {
+    const on = Object.entries(d.ready).filter(([, v]) => v).map(([k]) => k);
+    $('engStat').textContent = '· 서버 엔진: ' + (on.length ? on.join(', ') : '없음 → gtx 폴백');
+  }).catch(() => { $('engStat').textContent = '· ⚠ 번역 서버 연결 실패 → gtx 폴백'; });
+}
+warmUp();
+$('engine').addEventListener('change', warmUp);
+
 function begin() {
   if (!IS_CHROME) return;
+  warmUp();
   if (engine.start(mode === 'EN' ? 'en-US' : 'ko-KR')) {
     running = true; setStatus('듣는 중 (' + mode + ')', true);
     $('startBtn').textContent = '⏸ 정지 [S]'; $('startBtn').className = 'stop';
