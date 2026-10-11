@@ -34,6 +34,8 @@
   .strip-root.fill .strip { position: static; width: 100%; height: 100%; transform: none; }
   .strip .ln { font-size: var(--fs); line-height: 1.35; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
   .strip .ln.interim { color: #9aa4af; font-weight: 400; }
+  .ovguide { position: fixed; left: 0; right: 0; top: 0; z-index: 9; padding: 6px 12px; background: #d29922; color: #000;
+    font: 600 15px "Segoe UI", "Malgun Gothic", sans-serif; text-align: center; }
   .strip-root.fill .ln { text-align: var(--ta, center); }
 
   /* ---- 운영 화면 ---- */
@@ -88,7 +90,7 @@
   <div class="card mode-card">
     <h2>① 보조 스크린 <small>보조 모니터·프로젝터가 따로 있을 때 — 좌/우 세로 띠</small></h2>
     <div class="row">
-      <button id="openAux" class="primary">① 보조 스크린으로 열기</button>
+      <button id="openAux">① 보조 스크린으로 열기</button>
       <label>위치 <select id="side"><option value="left">좌측</option><option value="right">우측</option></select></label>
       <label>세로 <select id="vpos"><option value="top">위</option><option value="middle">가운데</option><option value="bottom">아래</option></select></label>
       <label>띠 폭 <input id="widthPct" type="range" min="20" max="60" step="1"><span id="widthV"></span></label>
@@ -267,7 +269,10 @@ async function openAux() {
   } catch (e) { /* 권한 거부 시 기본 위치 — 수동으로 끌어다 놓기 */ }
   window.open(location.pathname + '?view=caption', 'livecap-aux', feat);
 }
-$('openAux').onclick = openAux;
+// 마지막으로 연 모드 버튼을 초록(선택)으로 표시
+function markMode(m) { $('openAux').classList.toggle('primary', m === 'aux'); $('openOverlay').classList.toggle('primary', m === 'ov'); }
+markMode(S.lastMode || 'aux');
+$('openAux').onclick = () => { S.lastMode = 'aux'; saveSettings(S); markMode('aux'); openAux(); };
 
 let pipWin = null, pipStrip = null;
 // 오버레이 창의 목표 위치 — 이 창이 있는 화면의 상·하(폭 전체) 또는 좌·우(높이 전체) 가장자리
@@ -286,8 +291,25 @@ function fitOverlay() {
   const r = ovRect();
   try { pipWin.resizeTo(r.width, r.height); } catch (e) {}
   try { pipWin.moveTo(r.left, r.top); } catch (e) {}
+  checkPlacement();
 }
+// Chrome 은 PiP 창의 위치를 페이지가 정하지 못하게 한다(moveTo 무시) — 기본은 우하단.
+// 대신 사용자가 한 번 끌어다 놓으면 Chrome 이 그 위치·크기를 기억한다.
+// 그래서 목표 가장자리에 붙지 않았으면 PiP 안에 안내 띠를 띄우고, 붙으면 숨긴다.
+const GUIDE = { top: '↑ 이 창을 화면 맨 위로 끌어다 놓으세요', bottom: '↓ 이 창을 화면 맨 아래로 끌어다 놓으세요',
+                left: '← 이 창을 화면 왼쪽 끝으로 끌어다 놓으세요', right: '→ 이 창을 화면 오른쪽 끝으로 끌어다 놓으세요' };
+function checkPlacement() {
+  if (!pipWin) return;
+  const g = pipWin.document.querySelector('.ovguide'); if (!g) return;
+  const L = screen.availLeft ?? 0, T = screen.availTop ?? 0, W = screen.availWidth, H = screen.availHeight, tol = 60;
+  const x = pipWin.screenX, y = pipWin.screenY, w = pipWin.outerWidth, h = pipWin.outerHeight;
+  const ok = { top: y - T < tol, bottom: T + H - (y + h) < tol, left: x - L < tol, right: L + W - (x + w) < tol }[S.ovPos];
+  g.textContent = GUIDE[S.ovPos] + ' (한 번만 — Chrome 이 위치를 기억합니다)';
+  g.hidden = ok;
+}
+setInterval(checkPlacement, 500);
 async function openOverlay() {
+  S.lastMode = 'ov'; saveSettings(S); markMode('ov');
   const r = ovRect();
   if ('documentPictureInPicture' in window) {
     try {
@@ -298,9 +320,12 @@ async function openOverlay() {
       pipWin.document.body.style.margin = '0';
       const root = pipWin.document.createElement('div'); root.className = 'strip-root';
       pipWin.document.body.appendChild(root);
+      const guide = pipWin.document.createElement('div'); guide.className = 'ovguide'; guide.hidden = true;
+      pipWin.document.body.appendChild(guide);
       pipStrip = new Strip(pipWin.document, root, true); strips.push(pipStrip);
       pipStrip.apply(S); state.forEach(l => pipStrip.upsert(l.id, l.text, l.final));
       pipWin.addEventListener('pagehide', () => { strips.splice(strips.indexOf(pipStrip), 1); pipWin = pipStrip = null; });
+      checkPlacement();
       return;
     } catch (e) { /* 폴백 */ }
   }
