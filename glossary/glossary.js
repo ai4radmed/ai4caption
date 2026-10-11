@@ -40,10 +40,13 @@ async function refresh() {
   cache.ts = Date.now();                      // 실패해도 TTL 동안은 재시도하지 않는다 (기존 목록 유지)
 }
 
-// 오래되면 새로 읽되, 이미 목록이 있으면 기다리지 않는다 (stale-while-revalidate)
+// 오래되면(1분) 새로 읽는다. Edge 런타임은 응답 후 남은 작업을 끊으므로 백그라운드 갱신이 안 된다 → 기다려서 읽는다.
+// (분당 1회 · 같은 서울 CDN 이라 수십 ms)
 export async function glossary() {
-  if (Date.now() - cache.ts > TTL && !loading) loading = refresh().finally(() => { loading = null; });
-  if (cache.from === 'seed' && loading) await loading;   // 인스턴스 첫 요청만 기다린다
+  if (Date.now() - cache.ts > TTL) {
+    loading ??= refresh().finally(() => { loading = null; });
+    await loading;
+  }
   return cache;
 }
 
