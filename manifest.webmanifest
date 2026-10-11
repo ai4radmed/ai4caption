@@ -1,6 +1,6 @@
 {
-  "name": "SideCaption — 실시간 영어 자막",
-  "short_name": "SideCaption",
+  "name": "동시자막 SimulCap — 강의용 실시간 영어 자막",
+  "short_name": "동시자막",
   "description": "강의용 실시간 영어 자막 (보조 스크린 띠 · 오버레이)",
   "id": "./",
   "start_url": "./",
