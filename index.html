@@ -349,13 +349,14 @@ class WebSpeechEngine {
     const r = this.r = new SR();
     r.lang = lang; r.continuous = true; r.interimResults = true;
     r.onresult = e => {
+      if (this.err) { this.err = false; this.h.status('듣는 중 (' + mode + ')', true); }   // 오류 후 인식 재개 → 상태 복구
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript.trim();
         if (!t) continue;
         e.results[i].isFinal ? this.h.final(t) : this.h.interim(t);
       }
     };
-    r.onerror = ev => { if (ev.error === 'not-allowed') { this.on = false; this.h.status('마이크 권한 거부', false); } else if (ev.error !== 'no-speech') this.h.status('오류: ' + ev.error, true); };
+    r.onerror = ev => { if (ev.error === 'not-allowed') { this.on = false; this.h.status('마이크 권한 거부', false); } else if (ev.error !== 'no-speech') { this.err = true; this.h.status(ev.error === 'network' ? '음성인식 연결 끊김 — 자동 재연결 중' : '음성인식 오류: ' + ev.error, true); } };
     r.onend = () => { if (this.on) { try { r.start(); } catch (e) {} } };
     r.start(); return true;
   }
